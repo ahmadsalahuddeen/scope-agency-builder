@@ -9,6 +9,8 @@ const AgencyPage = async (props: Props) => {
   const authUser = await currentUser()
   if(!authUser) return redirect('/sign-in')
   
+const agencyId = await verifyAndAcceptInvitation()
+
 const user = await getAuthUserDetails()
 
   return (
