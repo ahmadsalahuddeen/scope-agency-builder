@@ -1,9 +1,10 @@
 'use server';
 
-import { currentUser } from '@clerk/nextjs';
+import { clerkClient, currentUser } from '@clerk/nextjs';
 import { db } from './db';
 import { redirect } from 'next/navigation';
-import { User } from '@prisma/client';
+import { Role, User } from '@prisma/client';
+import { connect } from 'http2';
 
 export const getAuthUserDetails = async () => {
   // user object returned form clerk api
@@ -11,7 +12,6 @@ export const getAuthUserDetails = async () => {
   if (!user) {
     return;
   }
-
 
   // find and define return userdata field
   const userData = db.user.findUnique({
@@ -32,34 +32,152 @@ export const getAuthUserDetails = async () => {
   return userData;
 };
 
+// save activity logs notifications
+const saveActivityLogsNotification = async ({
+  agencyId,
+  description,
+  subaccountId,
+}: {
+  agencyId?: string;
+  description: string;
+  subaccountId?: string;
+}) => {
+  const authUser = await currentUser();
+  let userData;
 
+  if (!authUser) {
+    const response = await db.user.findFirst({
+      where: {
+        Agency: {
+          SubAccount: {
+            some: { id: subaccountId },
+          },
+        },
+      },
+    });
+    if (response) {
+      userData = response;
+    }
+  } else {
+    userData = await db.user.findUnique({
+      where: {
+        email: authUser.emailAddresses[0].emailAddress,
+      },
+    });
+  }
 
-// create a team user 
+  if (!userData) {
+    console.log('could not find a user');
+    return;
+  }
 
-const createTeamUser = async (agencyId: string, user: User) =>{
-if(user.role = 'AGENCY_OWNER') return null
+  let foundAgencyId = agencyId;
+  if (!foundAgencyId) {
+    if (!subaccountId) {
+      throw new Error('provide atleast agencyId or subaccountId');
+    }
+    const response = await db.subAccount.findUnique({
+      where: {
+        id: subaccountId,
+      },
+    });
+    if (response) foundAgencyId = response?.agencyId;
+  }
+  if (subaccountId) {
+    await db.notification.create({
+      data: {
+        notification: `${userData.name} | ${description}`,
+        User: {
+          connect: {
+            id: userData.id,
+          },
+        },
+        Agency: {
+          connect: {
+            id: foundAgencyId,
+          },
+        },
+        SubAccount: {
+          connect: {
+            id: subaccountId,
+          },
+        },
+      },
+    });
+  } else {
+    await db.notification.create({
+      data: {
+        notification: `${userData.name} | ${description}`,
+        Agency: {
+          connect: {
+            id: foundAgencyId,
+          },
+        },
+        User: {
+          connect: {
+            id: userData.id,
+          },
+        },
+      },
+    });
+  }
+};
 
+// create a team user
+const createTeamUser = async (agencyId: string, user: User) => {
+  if ((user.role = 'AGENCY_OWNER')) return null;
 
+  const response = await db.user.create({ data: { ...user } });
+  return response;
+};
 
-
-}
-
-
-
-export const verifyAndAcceptInvitation = async () =>{
+export const verifyAndAcceptInvitation = async () => {
   const user = await currentUser();
   if (!user) {
-    return redirect('/sign-in')
+    return redirect('/sign-in');
   }
 
   const invitationExists = await db.invitation.findUnique({
-    where:{
-      email: user.emailAddresses[0].emailAddress, 
-      status: "PENDING"
-    }
-  })
+    where: {
+      email: user.emailAddresses[0].emailAddress,
+      status: 'PENDING',
+    },
+  });
 
-   if(invitationExists){
-    const userDetails = await createTeamUser(invitationExists.agencyId,{} )
-   }
-}
+  if (invitationExists) {
+    const userDetails = await createTeamUser(invitationExists.agencyId, {
+      email: invitationExists.email,
+      agencyId: invitationExists.agencyId,
+      avatarUrl: user.imageUrl,
+      id: user.id,
+      name: `${user.firstName} ${user.lastName}`,
+      role: invitationExists.role,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await saveActivityLogsNotification({
+      agencyId: invitationExists?.agencyId,
+      description: 'Joined',
+      subaccountId: undefined,
+    });
+    if (userDetails) {
+      await clerkClient.users.updateUserMetadata(user.id, {
+        privateMetadata: {
+          role: userDetails.role || 'SUBACCOUNT_USER',
+        },
+      });
+      await db.invitation.delete({ where: { email: userDetails.email } });
+      return userDetails.agencyId;
+    } else return null;
+  
+  } else {
+
+    const agency = await db.user.findUnique({
+      where: {
+        email: user.emailAddresses[0].emailAddress,
+      },
+    });
+    return agency ? agency.agencyId : null;
+  }
+};
