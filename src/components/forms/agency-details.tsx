@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from '../ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '../ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import * as z from 'zod';
 import FileUpload from '../global/file-upload';
 
@@ -94,6 +94,7 @@ const AgencyDetailsComp = ({ data }: Props) => {
                         value={field.value}
                       />
                     </FormControl>
+                      <FormMessage/>
                   </FormItem>
                 )}
               ></FormField>
