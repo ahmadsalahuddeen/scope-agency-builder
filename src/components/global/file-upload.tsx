@@ -33,7 +33,7 @@ const FileUpload = ({ apiEndpoint, onChange, value }: Props) => {
     );
   }
 
-  return <div>FileUpload</div>;
+  return <div className='w-full bg-muted/30 '></div>;
 };
 
 export default FileUpload;

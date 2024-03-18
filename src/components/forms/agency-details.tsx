@@ -84,13 +84,18 @@ const AgencyDetailsComp = ({ data }: Props) => {
                 disabled={isLoading}
                 control={form.control}
                 name="agencyLogo"
-                render={({ field }) => 
-                <FormItem>
-                  <FormLabel>Agencylogo</FormLabel>
-                  <FormControl>
-                    <FileUpload ></FileUpload>
-                  </FormControl>
-                </FormItem>}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Agencylogo</FormLabel>
+                    <FormControl>
+                      <FileUpload
+                        apiEndpoint="agencyLogo"
+                        onChange={field.onChange}
+                        value={field.value}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
               ></FormField>
             </form>
           </Form>
