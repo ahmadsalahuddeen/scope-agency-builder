@@ -27,6 +27,7 @@ import * as z from 'zod';
 import FileUpload from '../global/file-upload';
 import { Input } from '../ui/input';
 import { Switch } from '../ui/switch';
+import { updateAgencyDetails } from '@/lib/queries';
 
 type Props = {
   data?: Partial<Agency>;
@@ -271,9 +272,9 @@ const AgencyDetailsComp = ({ data }: Props) => {
                   goals grow too so dont forget to set the bar higher!
                 </FormDescription>
                 <NumberInput defaultValue={data?.goal} 
-                onChange={()=>{
+                onValueChange={async (value: number)=>{
                   if(!data?.id) return 
-                  
+                  await updateAgencyDetails(data.id, {goal: value})
                 }}
                 />
               </div>

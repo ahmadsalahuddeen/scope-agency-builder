@@ -170,9 +170,7 @@ export const verifyAndAcceptInvitation = async () => {
       await db.invitation.delete({ where: { email: userDetails.email } });
       return userDetails.agencyId;
     } else return null;
-  
   } else {
-
     const agency = await db.user.findUnique({
       where: {
         email: user.emailAddresses[0].emailAddress,
@@ -182,9 +180,13 @@ export const verifyAndAcceptInvitation = async () => {
   }
 };
 
-
-
-
-const upateAgencyDetails = async (agencyId: string, agencyDetails : Partial<Agency>)=>{
-
-}
+export const updateAgencyDetails = async (
+  agencyId: string,
+  agencyDetails: Partial<Agency>
+) => {
+  const response = await db.agency.update({
+    where: { id: agencyId },
+    data: { ...agencyDetails },
+  });
+return response
+};
