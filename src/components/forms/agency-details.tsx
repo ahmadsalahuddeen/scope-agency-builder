@@ -42,9 +42,11 @@ import {
   initUser,
   saveActivityLogsNotification,
   updateAgencyDetails,
+  upsertAgency,
 } from '@/lib/queries';
 import { Button } from '../ui/button';
 import Loading from '../global/loading';
+import { v4 } from 'uuid';
 
 type Props = {
   data?: Partial<Agency>;
@@ -123,7 +125,26 @@ const AgencyDetailsComp = ({ data }: Props) => {
 
 //WIP: stripe customeID
       newUserData = await initUser({role: 'AGENCY_OWNER'})
+      if(!data?.id){
+        const response = await upsertAgency({
+          id: data?.id ? data.id : v4(),
 
+          address: values.address,
+          agencyLogo: values.agencyLogo,
+          city: values.city,
+          companyPhone: values.companyPhone,
+          country: values.country,
+          name: values.name,
+          state: values.state,
+          whiteLabel: values.whiteLabel,
+          zipCode: values.zipCode,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          companyEmail: values.companyEmail,
+          connectAccountId: '',
+          goal: 5,
+        })
+      }
     } catch (error) {}
   };
 
