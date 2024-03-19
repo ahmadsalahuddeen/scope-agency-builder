@@ -3,7 +3,7 @@
 import { clerkClient, currentUser } from '@clerk/nextjs';
 import { db } from './db';
 import { redirect } from 'next/navigation';
-import { Agency, Role, User } from '@prisma/client';
+import { Agency, Plan, Role, User } from '@prisma/client';
 import { connect } from 'http2';
 
 export const getAuthUserDetails = async () => {
@@ -180,8 +180,7 @@ export const verifyAndAcceptInvitation = async () => {
   }
 };
 
-
-// udpate agency details 
+// udpate agency details
 export const updateAgencyDetails = async (
   agencyId: string,
   agencyDetails: Partial<Agency>
@@ -190,11 +189,90 @@ export const updateAgencyDetails = async (
     where: { id: agencyId },
     data: { ...agencyDetails },
   });
-return response
+  return response;
+};
+
+//deleting agency
+export const deleteAgency = async (agencyId: string) => {
+  const response = await db.agency.delete({ where: { id: agencyId } });
+  return response;
+};
+
+// intitializing new user
+export const initUser = async (newUser: Partial<User>) => {
+  const authUser = await currentUser();
+  if(!authUser) return 
+  const userData = await db.user.upsert({
+    where: { email: authUser?.emailAddresses[0].emailAddress },
+    update: newUser,
+    create: {
+      id: authUser?.id,
+      name: `${authUser?.firstName} ${authUser?.lastName}`,
+      email: authUser?.emailAddresses[0].emailAddress,
+      avatarUrl: authUser?.imageUrl,
+      role: newUser.role || "SUBACCOUNT_USER"
+
+    }
+  });
+  await clerkClient.users.updateUserMetadata(authUser.id, {privateMetadata:{
+    role: newUser.role || 'SUBACCOUNT_USER'
+  }})
+
+  return userData
 };
 
 
-//deleting agency 
-export const deleteAgency = async () =>{
-  
+
+//upsert agency
+export const upsertAgency = async(agency: Agency, price?: Plan)=>{
+  if(!agency.companyEmail) return null 
+    try {
+      const response = await db.agency.upsert({
+        where: {id: agency.id},
+        update: agency,
+        create: {
+          users: {
+            connect: {email: agency.companyEmail}
+          },
+          ...agency,
+          SidebarOption: {
+            create:[
+              {
+                name: 'Dashboard',
+                icon: 'category',
+                link: `/agency/${agency.id}`,
+              },
+              {
+                name: 'Launchpad',
+                icon: 'clipboardIcon',
+                link: `/agency/${agency.id}/launchpad`,
+              },
+              {
+                name: 'Billing',
+                icon: 'payment',
+                link: `/agency/${agency.id}/billing`,
+              },
+              {
+                name: 'Settings',
+                icon: 'settings',
+                link: `/agency/${agency.id}/settings`,
+              },
+              {
+                name: 'Sub Accounts',
+                icon: 'person',
+                link: `/agency/${agency.id}/all-subaccounts`,
+              },
+              {
+                name: 'Team',
+                icon: 'shield',
+                link: `/agency/${agency.id}/team`,
+              },
+            ]
+          }
+        }
+      })
+    } catch (error) {
+      
+    }
+
 }

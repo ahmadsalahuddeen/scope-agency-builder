@@ -14,6 +14,7 @@ type Props = {
 };
 
 const AgencyPage = async ({ searchParams }: Props) => {
+  // verify the invitation or get the agency id if exists
   const agencyId = await verifyAndAcceptInvitation();
   console.log(agencyId);
 
@@ -37,7 +38,7 @@ const AgencyPage = async ({ searchParams }: Props) => {
 
         if (!stateAgencyId) return <div>Not Authorized</div>;
         return redirect(
-          `/agency/${stateAgencyId}/${AgencyPage}?code=${searchParams.code}`
+          `/agency/${stateAgencyId}/${statePath}?code=${searchParams.code}`
         );
 
         //redirects to agency dashboard
@@ -51,9 +52,11 @@ const AgencyPage = async ({ searchParams }: Props) => {
   const authUser = await currentUser();
   return (
     <div className="flex justify-center items-center mt-4">
-      <div className='max-w-[850px] border-[1px] p-4 rounded-xl'>
-<h1 className='text-4xl'>Create An Agency</h1>
-<AgencyDetailsComp data={{companyEmail: authUser?.emailAddresses[0].emailAddress}} />
+      <div className="max-w-[850px] border-[1px] p-4 rounded-xl">
+        <h1 className="text-4xl">Create An Agency</h1>
+        <AgencyDetailsComp
+          data={{ companyEmail: authUser?.emailAddresses[0].emailAddress }}
+        />
       </div>
     </div>
   );
