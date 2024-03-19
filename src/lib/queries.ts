@@ -33,7 +33,7 @@ export const getAuthUserDetails = async () => {
 };
 
 // save activity logs notifications
-const saveActivityLogsNotification = async ({
+export const saveActivityLogsNotification = async ({
   agencyId,
   description,
   subaccountId,
@@ -180,6 +180,8 @@ export const verifyAndAcceptInvitation = async () => {
   }
 };
 
+
+// udpate agency details 
 export const updateAgencyDetails = async (
   agencyId: string,
   agencyDetails: Partial<Agency>
@@ -190,3 +192,9 @@ export const updateAgencyDetails = async (
   });
 return response
 };
+
+
+//deleting agency 
+export const deleteAgency = async () =>{
+  
+}
