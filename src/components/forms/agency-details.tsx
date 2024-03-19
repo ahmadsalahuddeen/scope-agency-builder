@@ -123,9 +123,9 @@ const AgencyDetailsComp = ({ data }: Props) => {
         };
       }
 
-//WIP: stripe customeID
-      newUserData = await initUser({role: 'AGENCY_OWNER'})
-      if(!data?.id){
+      //WIP: stripe customeID
+      newUserData = await initUser({ role: 'AGENCY_OWNER' });
+      if (!data?.id) {
         const response = await upsertAgency({
           id: data?.id ? data.id : v4(),
 
@@ -143,9 +143,24 @@ const AgencyDetailsComp = ({ data }: Props) => {
           companyEmail: values.companyEmail,
           connectAccountId: '',
           goal: 5,
-        })
+        });
+        toast({
+          title: 'Created Agency',
+        });
+  
+        if(data?.id) return router.refresh()
+        if(response) {
+          return router.refresh()
+        }
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+      toast({
+        variant: 'destructive',
+        title: 'Oppse!',
+        description: 'could not create your agency ',
+      });
+    }
   };
 
   //handles the deletion of agency
@@ -164,7 +179,7 @@ const AgencyDetailsComp = ({ data }: Props) => {
       console.log(error);
       toast({
         variant: 'destructive',
-        title: 'ooppse! Deleting Failed',
+        title: 'Oppse! Deletion Failed',
         description: 'could not delete your agency ',
       });
     }
