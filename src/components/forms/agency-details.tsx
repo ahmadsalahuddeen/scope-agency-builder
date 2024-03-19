@@ -5,6 +5,7 @@ import { useToast } from '../ui/use-toast';
 import { useRouter } from 'next/navigation';
 import { NumberInput } from '@tremor/react';
 import { useForm } from 'react-hook-form';
+import { ReloadIcon } from '@radix-ui/react-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   AlertDialog,
@@ -147,11 +148,8 @@ const AgencyDetailsComp = ({ data }: Props) => {
         toast({
           title: 'Created Agency',
         });
-  
-        if(data?.id) return router.refresh()
-        if(response) {
-          return router.refresh()
-        }
+
+        return router.refresh();
       }
     } catch (error) {
       console.log(error);
@@ -402,7 +400,11 @@ const AgencyDetailsComp = ({ data }: Props) => {
                 </div>
               )}
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? <Loading /> : 'Save Agency Information'}
+                {isLoading ? (
+                  <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  'Save Agency Information'
+                )}
               </Button>
             </form>
           </Form>
