@@ -49,7 +49,7 @@ const Sidebar = async ({ id, type }: Props) => {
       {/* desktop nav */}
       <MenuOptions
         details={details}
-        users={user}
+        user={user}
         sidebarLogo={sidebarLogo}
         id={id}
         defaultOpen={true}
@@ -60,7 +60,7 @@ const Sidebar = async ({ id, type }: Props) => {
       {/* mobile nav */}
       <MenuOptions
         details={details}
-        users={user}
+        user={user}
         sidebarLogo={sidebarLogo}
         id={id}
         sidebarOpt={sideBarOpt}
