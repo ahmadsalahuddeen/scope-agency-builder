@@ -1,6 +1,9 @@
 import Sidebar from '@/components/sidebar';
 import Unauthorized from '@/components/unauthorized';
-import { getNotificationAndUsers, verifyAndAcceptInvitation } from '@/lib/queries';
+import {
+  getNotificationAndUsers,
+  verifyAndAcceptInvitation,
+} from '@/lib/queries';
 import { currentUser } from '@clerk/nextjs';
 import { redirect } from 'next/navigation';
 import React from 'react';
@@ -16,21 +19,24 @@ const layout = async ({ children, params }: Props) => {
   if (!user) return redirect('/');
   if (!agencyId) return redirect('/agency');
 
-  if(user.privateMetadata.role !== 'AGENCY_OWNER' && user.privateMetadata.role !== 'AGENCY_ADMIN') {
-    return <Unauthorized/>
+  if (
+    user.privateMetadata.role !== 'AGENCY_OWNER' &&
+    user.privateMetadata.role !== 'AGENCY_ADMIN'
+  ) {
+    return <Unauthorized />;
   }
 
-let allNoti: any  = []
+  let allNoti: any = [];
 
-const notifications = await getNotificationAndUsers(agencyId)
-if(notifications) allNoti = notifications
+  const notifications = await getNotificationAndUsers(agencyId);
+  if (notifications) allNoti = notifications;
 
-
-
-  return <div className='h-screen overflow-hidden'>
-<Sidebar  id={params.agencyId} type='agency'/>
-<div className='md:pl-[300px] '></div>
-  </div>;
+  return (
+    <div className="h-screen overflow-hidden">
+      <Sidebar id={params.agencyId} type="agency" />
+      <div className="md:pl-[300px] ">{children}</div>
+    </div>
+  );
 };
 
 export default layout;
