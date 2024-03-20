@@ -7,7 +7,6 @@ import { Agency, Plan, Role, User } from '@prisma/client';
 import { connect } from 'http2';
 
 export const getAuthUserDetails = async () => {
-
   const user = await currentUser();
   if (!user) {
     return;
@@ -201,7 +200,7 @@ export const deleteAgency = async (agencyId: string) => {
 // intitializing new user
 export const initUser = async (newUser: Partial<User>) => {
   const authUser = await currentUser();
-  if(!authUser) return 
+  if (!authUser) return;
   const userData = await db.user.upsert({
     where: { email: authUser?.emailAddresses[0].emailAddress },
     update: newUser,
@@ -210,70 +209,84 @@ export const initUser = async (newUser: Partial<User>) => {
       name: `${authUser?.firstName} ${authUser?.lastName}`,
       email: authUser?.emailAddresses[0].emailAddress,
       avatarUrl: authUser?.imageUrl,
-      role: newUser.role || "SUBACCOUNT_USER"
-
-    }
+      role: newUser.role || 'SUBACCOUNT_USER',
+    },
   });
-  await clerkClient.users.updateUserMetadata(authUser.id, {privateMetadata:{
-    role: newUser.role || 'SUBACCOUNT_USER'
-  }})
+  await clerkClient.users.updateUserMetadata(authUser.id, {
+    privateMetadata: {
+      role: newUser.role || 'SUBACCOUNT_USER',
+    },
+  });
 
-  return userData
+  return userData;
 };
 
-
-
 //upsert agency
-export const upsertAgency = async(agency: Agency, price?: Plan)=>{
-  if(!agency.companyEmail) return null 
-    try {
-      const response = await db.agency.upsert({
-        where: {id: agency.id},
-        update: agency,
-        create: {
-          users: {
-            connect: {email: agency.companyEmail}
-          },
-          ...agency,
-          SidebarOption: {
-            create:[
-              {
-                name: 'Dashboard',
-                icon: 'category',
-                link: `/agency/${agency.id}`,
-              },
-              {
-                name: 'Launchpad',
-                icon: 'clipboardIcon',
-                link: `/agency/${agency.id}/launchpad`,
-              },
-              {
-                name: 'Billing',
-                icon: 'payment',
-                link: `/agency/${agency.id}/billing`,
-              },
-              {
-                name: 'Settings',
-                icon: 'settings',
-                link: `/agency/${agency.id}/settings`,
-              },
-              {
-                name: 'Sub Accounts',
-                icon: 'person',
-                link: `/agency/${agency.id}/all-subaccounts`,
-              },
-              {
-                name: 'Team',
-                icon: 'shield',
-                link: `/agency/${agency.id}/team`,
-              },
-            ]
-          }
-        }
-      })
-      return response
-    } catch (error) {
-      console.log(error)
-    }
+export const upsertAgency = async (agency: Agency, price?: Plan) => {
+  if (!agency.companyEmail) return null;
+  try {
+    const response = await db.agency.upsert({
+      where: { id: agency.id },
+      update: agency,
+      create: {
+        users: {
+          connect: { email: agency.companyEmail },
+        },
+        ...agency,
+        SidebarOption: {
+          create: [
+            {
+              name: 'Dashboard',
+              icon: 'category',
+              link: `/agency/${agency.id}`,
+            },
+            {
+              name: 'Launchpad',
+              icon: 'clipboardIcon',
+              link: `/agency/${agency.id}/launchpad`,
+            },
+            {
+              name: 'Billing',
+              icon: 'payment',
+              link: `/agency/${agency.id}/billing`,
+            },
+            {
+              name: 'Settings',
+              icon: 'settings',
+              link: `/agency/${agency.id}/settings`,
+            },
+            {
+              name: 'Sub Accounts',
+              icon: 'person',
+              link: `/agency/${agency.id}/all-subaccounts`,
+            },
+            {
+              name: 'Team',
+              icon: 'shield',
+              link: `/agency/${agency.id}/team`,
+            },
+          ],
+        },
+      },
+    });
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
-}
+//get notification
+export const getNotificationAndUsers = async (agencyId: string) => {
+  try {
+    const response = await db.notification.findMany({
+      where: { agencyId },
+      include: { User: true },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
