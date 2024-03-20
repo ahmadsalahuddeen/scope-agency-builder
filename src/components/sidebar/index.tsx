@@ -1,5 +1,6 @@
 import { getAuthUserDetails } from '@/lib/queries';
 import React from 'react';
+import MenuOptions from './menu-options';
 
 type Props = {
   id: string;
@@ -43,7 +44,30 @@ const Sidebar = async ({ id, type }: Props) => {
         permission.subAccountId === subaccount.id && permission.access
     )
   );
-  return <div>Sidebar</div>;
+  return (
+    <>
+      {/* desktop nav */}
+      <MenuOptions
+        details={details}
+        users={user}
+        sidebarLogo={sidebarLogo}
+        id={id}
+        defaultOpen={true}
+        sidebarOpt={sideBarOpt}
+        subAccounts={subaccounts}
+      />
+
+      {/* mobile nav */}
+      <MenuOptions
+        details={details}
+        users={user}
+        sidebarLogo={sidebarLogo}
+        id={id}
+        sidebarOpt={sideBarOpt}
+        subAccounts={subaccounts}
+      />
+    </>
+  );
 };
 
 export default Sidebar;
