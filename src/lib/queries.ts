@@ -7,7 +7,7 @@ import { Agency, Plan, Role, User } from '@prisma/client';
 import { connect } from 'http2';
 
 export const getAuthUserDetails = async () => {
-  // user object returned form clerk api
+
   const user = await currentUser();
   if (!user) {
     return;
