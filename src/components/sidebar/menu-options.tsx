@@ -25,6 +25,8 @@ import {
 } from '@/components/ui/command';
 import Link from 'next/link';
 import { useModal } from '@/providers/modal-provider';
+import CustomModal from '../global/custom-modal';
+import SubAccountDetails from '../forms/subaccount-details';
 
 type Props = {
   defaultOpen?: boolean;
@@ -45,7 +47,7 @@ const MenuOptions = ({
   user,
   id,
 }: Props) => {
-  const {setOpen} = useModal()
+  const { setOpen } = useModal();
   const [isMounted, setIsMounted] = useState(false); // temperory solution for hydration error due to shadcn sheet comp
 
   const openState = useMemo(
@@ -62,8 +64,8 @@ const MenuOptions = ({
   return (
     <Sheet
       modal={false}
-      open={true}
-      // {...openState}
+
+      {...openState}
     >
       <SheetTrigger
         asChild
@@ -228,9 +230,20 @@ const MenuOptions = ({
 
               {(user?.role === 'AGENCY_OWNER' ||
                 user?.role === 'AGENCY_ADMIN') && (
-                <Button className="w-full flex  gap-2" onClick={()=>{
-                  setOpen()
-                }}>
+                <Button
+                  className="w-full flex  gap-2"
+                  onClick={() => {
+                    setOpen(
+                      <CustomModal
+                        title="Create a Subaccount"
+                        subHeading="you can switch between your Agency account and Sub account from the sidebar"
+                      >
+<SubAccountDetails agencyDetails={user?.Agency} userId={user?.id} userName={user.name}  />
+
+                      </CustomModal>
+                    );
+                  }}
+                >
                   <PlusCircle size={16} />
                   Create Sub Account
                 </Button>
