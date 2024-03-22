@@ -23,7 +23,7 @@ type ModelContextType = {
 };
 
 export const ModalContext = createContext<ModelContextType>({
-  data: {},
+  data: {}, 
   isOpen: false,
   setOpen: (modal: React.ReactNode, fetchData?: () => Promise<any>) => {},
   setClose: () => {},

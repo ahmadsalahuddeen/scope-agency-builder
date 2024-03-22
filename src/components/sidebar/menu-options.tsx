@@ -24,6 +24,7 @@ import {
   CommandShortcut,
 } from '@/components/ui/command';
 import Link from 'next/link';
+import { useModal } from '@/providers/modal-provider';
 
 type Props = {
   defaultOpen?: boolean;
@@ -44,6 +45,7 @@ const MenuOptions = ({
   user,
   id,
 }: Props) => {
+  const {setOpen} = useModal()
   const [isMounted, setIsMounted] = useState(false); // temperory solution for hydration error due to shadcn sheet comp
 
   const openState = useMemo(
@@ -226,7 +228,9 @@ const MenuOptions = ({
 
               {(user?.role === 'AGENCY_OWNER' ||
                 user?.role === 'AGENCY_ADMIN') && (
-                <Button className="w-full flex  gap-2">
+                <Button className="w-full flex  gap-2" onClick={()=>{
+                  setOpen()
+                }}>
                   <PlusCircle size={16} />
                   Create Sub Account
                 </Button>
