@@ -262,7 +262,7 @@ const MenuOptions = ({
           <nav className="relative">
             <Command className="rounded-lg overflow-visible bg-transparent">
               <CommandInput placeholder="Search..." />
-              <CommandList className="overflow-visible pb-16">
+              <CommandList className="overflow-visible py-4">
                 <CommandEmpty>No Results Found</CommandEmpty>
                 <CommandGroup className="overflow-visible">
                   {sidebarOpt.map((sidebarOption) => {
