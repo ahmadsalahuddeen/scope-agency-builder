@@ -319,6 +319,7 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
         create: {
           access: true,
           email: agencyOwner.email,
+          id: permissionId
         },
         connect: {
           subAccountId: subAccount.id,
