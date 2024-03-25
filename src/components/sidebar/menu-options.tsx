@@ -127,7 +127,7 @@ const MenuOptions = ({
                           {defaultOpen ? (
                             <Link
                               href={`/agency/${user?.Agency?.id}`}
-                              className="flex gap-4 w-full h-full"
+                              className="flex gap-4 w-full h-full dark:hover:text-white hover:text-black text-primary"
                             >
                               <div className="relative w-16">
                                 <Image
@@ -137,7 +137,7 @@ const MenuOptions = ({
                                   className="rounded-md object-contain"
                                 />
                               </div>
-                              <div className="flex flex-col flex-1">
+                              <div className="flex flex-col flex-1 ">
                                 {user?.Agency?.name}
                                 <span className="text-muted-foreground">
                                   {user?.Agency?.address}
@@ -148,7 +148,7 @@ const MenuOptions = ({
                             <SheetClose asChild>
                               <Link
                                 href={`/agency/${user?.Agency?.id}`}
-                                className="flex gap-4 w-full h-full"
+                                className="flex gap-4 w-full h-full dark:hover:text-white hover:text-black text-primary"
                               >
                                 <div className="relative w-16">
                                   <Image
@@ -182,7 +182,7 @@ const MenuOptions = ({
                             {defaultOpen ? (
                               <Link
                                 href={`/subaccount/${subaccount?.id}`}
-                                className="flex gap-4 w-full h-full"
+                                className="flex gap-4 w-full h-full dark:hover:text-white hover:text-black text-primary"
                               >
                                 <div className="relative w-16">
                                   <Image
@@ -203,7 +203,7 @@ const MenuOptions = ({
                               <SheetClose asChild>
                                 <Link
                                   href={`/subaccount/${subaccount?.id}`}
-                                  className="flex gap-4 w-full h-full"
+                                  className="flex gap-4 w-full h-full dark:hover:text-white hover:text-black text-primary"
                                 >
                                   <div className="relative w-16">
                                     <Image
