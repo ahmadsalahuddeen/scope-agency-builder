@@ -1,11 +1,32 @@
-import React from 'react'
+import AgencyDetailsComp from '@/components/forms/agency-details';
+import { db } from '@/lib/db';
+import { currentUser } from '@clerk/nextjs';
+import React from 'react';
 
-type Props = {}
+type Props = {
+  params: { agencyId: string };
+};
 
-const Page = (props: Props) => {
-  return (
-    <div>Page</div>
-  )
-}
+const SettingsPage = async ({ params }: Props) => {
+  const authUser = await currentUser();
+  if (!authUser) return null;
+  const userDetails = await db.user.findUnique({
+    where: { email: authUser?.emailAddresses[0].emailAddress },
+  });
+  if (!userDetails) return null;
 
-export default Page
+  const agencyDetails = await db.agency.findUnique({
+    where: {
+      id: params.agencyId,
+    },
+    include: {
+      SubAccount: true,
+    },
+  });
+  if (!agencyDetails) return null;
+
+const subAccounts = agencyDetails.SubAccount  
+  return <div className='flex lg:!flex-row flex-col gap-4 '><AgencyDetailsComp data={agencyDetails} /></div>;
+};
+
+export default SettingsPage;

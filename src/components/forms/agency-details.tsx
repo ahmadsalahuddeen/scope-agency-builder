@@ -1,7 +1,7 @@
 'use client';
 import { Agency } from '@prisma/client';
 import React, { useEffect, useState } from 'react';
-import { useToast } from '../ui/use-toast';
+
 import { useRouter } from 'next/navigation';
 import { NumberInput } from '@tremor/react';
 import { useForm } from 'react-hook-form';
@@ -46,8 +46,9 @@ import {
   upsertAgency,
 } from '@/lib/queries';
 import { Button } from '../ui/button';
-import Loading from '../global/loading';
+
 import { v4 } from 'uuid';
+import { toast } from 'sonner';
 
 type Props = {
   data?: Partial<Agency>;
@@ -56,7 +57,7 @@ type Props = {
 const FormSchema = z.object({
   name: z.string().min(1, { message: 'Agency name must be atleast 2 chars.' }),
   agencyLogo: z.string().min(1, { message: 'Provide logo for the agency' }),
-  companyEmail: z.string().min(1),
+  companyEmail: z.string().min(1).email(),
   companyPhone: z.string().min(1),
   whiteLabel: z.boolean(),
   address: z.string().min(1),
@@ -67,7 +68,7 @@ const FormSchema = z.object({
 });
 
 const AgencyDetailsComp = ({ data }: Props) => {
-  const { toast } = useToast();
+
   const router = useRouter();
   const [deletingAgency, setDeletingAgency] = useState(false);
 
@@ -95,7 +96,9 @@ const AgencyDetailsComp = ({ data }: Props) => {
   }, [data]);
 
   const handleSubmit = async (values: z.infer<typeof FormSchema>) => {
+console.log('getting here')
     try {
+
       let newUserData;
       let customerId;
 
@@ -125,8 +128,11 @@ const AgencyDetailsComp = ({ data }: Props) => {
       }
 
       //WIP: stripe customeID
+
+
       newUserData = await initUser({ role: 'AGENCY_OWNER' });
-      if (!data?.id) {
+
+        console.log('getting here 222')
         const response = await upsertAgency({
           id: data?.id ? data.id : v4(),
 
@@ -145,19 +151,15 @@ const AgencyDetailsComp = ({ data }: Props) => {
           connectAccountId: '',
           goal: 5,
         });
-        toast({
-          title: 'Created Agency',
-        });
+
+
+        toast('Updated Agency information')
 
         return router.refresh();
-      }
+      
     } catch (error) {
       console.log(error);
-      toast({
-        variant: 'destructive',
-        title: 'Oppse!',
-        description: 'could not create your agency ',
-      });
+      toast('Oppse!', {description: 'could not create your agency'});
     }
   };
 

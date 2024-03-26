@@ -4,20 +4,48 @@ import { NotificationWithUser } from '@/lib/types';
 import { UserButton } from '@clerk/nextjs';
 import React, { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
-import { Sheet, SheetTrigger } from '../ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '../ui/sheet';
 import { Bell } from 'lucide-react';
 import { ModeToggle } from './mode-toggle';
+import { Role } from '@prisma/client';
+import { Card } from '../ui/card';
+import { Switch } from '../ui/switch';
+
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
 type Props = {
   notifications: NotificationWithUser | [];
   className?: string;
-  role?: string;
+  role?: Role;
   subaccountId?: string;
 };
 
 const InfoBar = ({ notifications, className, role, subaccountId }: Props) => {
   const [allNotifications, setAllNotifications] = useState(notifications);
   const [showAll, setShowAll] = useState(true);
+
+  const handleChange = () => {
+    if (!showAll) {
+      setAllNotifications(notifications);
+    } else {
+      if (notifications?.length !== 0) {
+        setAllNotifications(
+          notifications?.filter(
+            (notif) => notif.subAccountId === subaccountId
+          ) ?? []
+        );
+      }
+    }
+    setShowAll((prev) => !prev);
+  };
+
   return (
     <>
       <div
@@ -34,7 +62,57 @@ const InfoBar = ({ notifications, className, role, subaccountId }: Props) => {
                 <Bell size={17} />
               </div>
             </SheetTrigger>
-            
+            <SheetContent className="mt-4 mr-4 pr-4 flex flex-col rounded-lg">
+              <SheetHeader className="text-left">
+                <SheetTitle>Notifications</SheetTitle>
+                <SheetDescription>
+                  {(role === 'AGENCY_ADMIN' || role === 'AGENCY_OWNER') && (
+                    <Card className="flex items-center justify-between p-4">
+                      Current Subaccount
+                      <Switch onChangeCapture={handleChange} />
+                    </Card>
+                  )}
+                </SheetDescription>
+              </SheetHeader>
+              {notifications?.map((notification) => (
+                <div
+                  className="flex flex-col gap-y-2 mb-2 overflow-x-scroll text-ellipsis"
+                  key={notification.id}
+                >
+                  <div className="flex gap-2">
+                    <Avatar>
+                      <AvatarImage
+                        src={notification.User.avatarUrl}
+                        alt="profile picture
+                    "
+                      />
+                      <AvatarFallback className="bg-primary">
+                        {notification.User.name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className='flex flex-col'>
+                      <p>
+                        <span className='font-bold'>
+                          {notification.notification.split('|')[0]}
+                        </span>
+                        <span className='text-muted-foreground'>
+                          {notification.notification.split('|')[1]}
+                        </span>
+                        <span className='font-bold'>
+                          {notification.notification.split('|')[2]}
+                        </span>
+                      </p>
+                      <small className='text-xs text-muted-foreground'>
+                        {new Date(notification.createdAt).toLocaleDateString()}
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {allNotifications?.length === 0 && (
+                <div className="flex mb-4 items-center justify-center text-muted-foreground">You have no notifications</div>
+              )}
+            </SheetContent>
           </Sheet>
           <ModeToggle />
         </div>

@@ -36,7 +36,7 @@ import { ReloadIcon } from '@radix-ui/react-icons';
 
 const formSchema = z.object({
   name: z.string(),
-  companyEmail: z.string(),
+  companyEmail: z.string().email(),
   companyPhone: z.string().min(1),
   address: z.string(),
   city: z.string(),
