@@ -18,14 +18,29 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '../ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '../ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../ui/form';
 import FileUpload from '../global/file-upload';
+import { Input } from '../ui/input';
 
 type Props = {
   id: string | null;
@@ -140,11 +155,8 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4"
-          >
-             <FormField
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
               disabled={form.formState.isSubmitting}
               control={form.control}
               name="avatarUrl"
@@ -171,11 +183,7 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
                 <FormItem className="flex-1">
                   <FormLabel>User full name</FormLabel>
                   <FormControl>
-                    <Input
-                      required
-                      placeholder="Full Name"
-                      {...field}
-                    />
+                    <Input required placeholder="Full Name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -199,6 +207,58 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
                     />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              disabled={form.formState.isSubmitting}
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel>User Role</FormLabel>
+                  <Select
+                    disabled={field.value === 'AGENCY_OWNER'}
+                    onValueChange={(value) => {
+                      if (
+                        value === 'SUBACCOUNT_GUEST' ||
+                        value === 'SUBACCOUNT_USER'
+                      ) {
+                        setRoleState(
+                          'You need to have subaccounts to assign Subaccount access to team members.'
+                        );
+                      } else {
+                        setRoleState('');
+                      }
+                      field.onChange(value)
+                    }}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select user role..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent> 
+                      <SelectItem value="AGENCY_ADMIN">
+                        Agency Admin
+                      </SelectItem>
+                      <SelectItem value="SUBACCOUNT_GUEST">
+                        Subaccount Guest
+                      </SelectItem>
+                      <SelectItem value="SUBACCOUNT_USER">
+                        Subaccount User
+                      </SelectItem>
+                      {(data.user?.role === 'AGENCY_OWNER' || userData.role === 'AGENCY_OWNER')&& (
+                        <SelectItem value="AGENCY_OWNER">
+                        Agency Owner
+                      </SelectItem>
+                      )}
+                      
+                    </SelectContent>
+                  </Select>
+
+                  <p className='text-muted-foreground'>{roleState}</p>
                 </FormItem>
               )}
             />
