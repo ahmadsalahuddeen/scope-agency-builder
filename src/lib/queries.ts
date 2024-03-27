@@ -270,6 +270,11 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
         },
       },
     });
+    await saveActivityLogsNotification({
+      agencyId: response.id,
+      description: 'Updated an Agency information',
+      subaccountId: undefined,
+    });
     return response;
   } catch (error) {
     console.log(error);
@@ -319,7 +324,7 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
         create: {
           access: true,
           email: agencyOwner.email,
-          id: permissionId
+          id: permissionId,
         },
         connect: {
           subAccountId: subAccount.id,
@@ -376,5 +381,13 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
     },
   });
 
+  return response;
+};
+
+export const getUserPermissions = async (userId: string) => {
+  const response = await db.user.findUnique({
+    where: { id: userId },
+    select: { Permissions: { include: { SubAccount: true } } },
+  });
   return response;
 };

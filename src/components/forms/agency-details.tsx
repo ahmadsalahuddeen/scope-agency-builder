@@ -96,7 +96,6 @@ const AgencyDetailsComp = ({ data }: Props) => {
   }, [data]);
 
   const handleSubmit = async (values: z.infer<typeof FormSchema>) => {
-console.log('getting here')
     try {
 
       let newUserData;
@@ -132,7 +131,6 @@ console.log('getting here')
 
       newUserData = await initUser({ role: 'AGENCY_OWNER' });
 
-        console.log('getting here 222')
         const response = await upsertAgency({
           id: data?.id ? data.id : v4(),
 
@@ -170,18 +168,14 @@ console.log('getting here')
     //WIP: discontinue agency subscription
     try {
       const response = await deleteAgency(data.id);
-      toast({
-        title: 'Deleted Agency',
-        description: 'Deleted you agency and all sub accounts',
-      });
+      toast('Deleted Agency', {description: 'Deleted you agency and all sub accounts'});
+
+  
       router.refresh();
     } catch (error) {
       console.log(error);
-      toast({
-        variant: 'destructive',
-        title: 'Oppse! Deletion Failed',
-        description: 'could not delete your agency ',
-      });
+      toast('Oppse! Deletion Failed', {description: 'Could not delete your agency'});
+
     }
     setDeletingAgency(false);
   };
