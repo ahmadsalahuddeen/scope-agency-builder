@@ -34,6 +34,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -41,6 +42,9 @@ import {
 } from '../ui/form';
 import FileUpload from '../global/file-upload';
 import { Input } from '../ui/input';
+import { Button } from '../ui/button';
+import { Loader } from 'lucide-react';
+import { Separator } from '../ui/separator';
 
 type Props = {
   id: string | null;
@@ -135,7 +139,7 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
       });
 
       if (updatedUser) {
-        toast('Success', { description: 'Update User Information' });
+        toast('Success', { description: 'Updated User Information' });
         setClose();
         router.refresh();
       } else {
@@ -230,7 +234,7 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
                       } else {
                         setRoleState('');
                       }
-                      field.onChange(value)
+                      field.onChange(value);
                     }}
                     defaultValue={field.value}
                   >
@@ -239,29 +243,46 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
                         <SelectValue placeholder="Select user role..." />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent> 
-                      <SelectItem value="AGENCY_ADMIN">
-                        Agency Admin
-                      </SelectItem>
+                    <SelectContent>
+                      <SelectItem value="AGENCY_ADMIN">Agency Admin</SelectItem>
                       <SelectItem value="SUBACCOUNT_GUEST">
                         Subaccount Guest
                       </SelectItem>
                       <SelectItem value="SUBACCOUNT_USER">
                         Subaccount User
                       </SelectItem>
-                      {(data.user?.role === 'AGENCY_OWNER' || userData.role === 'AGENCY_OWNER')&& (
+                      {(data.user?.role === 'AGENCY_OWNER' ||
+                        userData.role === 'AGENCY_OWNER') && (
                         <SelectItem value="AGENCY_OWNER">
-                        Agency Owner
-                      </SelectItem>
+                          Agency Owner
+                        </SelectItem>
                       )}
-                      
                     </SelectContent>
                   </Select>
 
-                  <p className='text-muted-foreground'>{roleState}</p>
+                  <p className="text-muted-foreground">{roleState}</p>
                 </FormItem>
               )}
             />
+            <Button disabled={form.formState.isSubmitting} type="submit">
+              {form.formState.isSubmitting ? (
+                <Loader className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                'Save User Details'
+              )}
+            </Button>
+            {authUserData?.role === 'AGENCY_OWNER' && (
+              <div>
+                <Separator className="my-4" />
+                <FormLabel>User Permissions</FormLabel>
+                <FormDescription className="mb-4">
+                  You can give Sub Account access to team member by turning on
+                  access control for each Sub Account. This is only visible to
+                  agency owners
+                </FormDescription>
+                <div className="flex flex-col gap-4"></div>
+              </div>
+            )}
           </form>
         </Form>
       </CardContent>

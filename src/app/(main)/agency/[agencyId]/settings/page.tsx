@@ -29,7 +29,7 @@ const SettingsPage = async ({ params }: Props) => {
   const subAccounts = agencyDetails.SubAccount;
   return (
     <div className="flex lg:!flex-row flex-col gap-4 ">
-      {/* <AgencyDetailsComp data={agencyDetails} /> */}
+      <AgencyDetailsComp data={agencyDetails} />
       <UserDetails type='agency' id={params.agencyId} subAccounts={subAccounts} userData={userDetails} />
     </div>
   );

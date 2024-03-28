@@ -68,7 +68,6 @@ const FormSchema = z.object({
 });
 
 const AgencyDetailsComp = ({ data }: Props) => {
-
   const router = useRouter();
   const [deletingAgency, setDeletingAgency] = useState(false);
 
@@ -97,7 +96,6 @@ const AgencyDetailsComp = ({ data }: Props) => {
 
   const handleSubmit = async (values: z.infer<typeof FormSchema>) => {
     try {
-
       let newUserData;
       let customerId;
 
@@ -128,36 +126,33 @@ const AgencyDetailsComp = ({ data }: Props) => {
 
       //WIP: stripe customeID
 
-
       newUserData = await initUser({ role: 'AGENCY_OWNER' });
 
-        const response = await upsertAgency({
-          id: data?.id ? data.id : v4(),
+      const response = await upsertAgency({
+        id: data?.id ? data.id : v4(),
 
-          address: values.address,
-          agencyLogo: values.agencyLogo,
-          city: values.city,
-          companyPhone: values.companyPhone,
-          country: values.country,
-          name: values.name,
-          state: values.state,
-          whiteLabel: values.whiteLabel,
-          zipCode: values.zipCode,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          companyEmail: values.companyEmail,
-          connectAccountId: '',
-          goal: 5,
-        });
+        address: values.address,
+        agencyLogo: values.agencyLogo,
+        city: values.city,
+        companyPhone: values.companyPhone,
+        country: values.country,
+        name: values.name,
+        state: values.state,
+        whiteLabel: values.whiteLabel,
+        zipCode: values.zipCode,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        companyEmail: values.companyEmail,
+        connectAccountId: '',
+        goal: 5,
+      });
 
+      toast('Updated Agency information');
 
-        toast('Updated Agency information')
-
-        return router.refresh();
-      
+      return router.refresh();
     } catch (error) {
       console.log(error);
-      toast('Oppse!', {description: 'could not create your agency'});
+      toast('Oppse!', { description: 'could not create your agency' });
     }
   };
 
@@ -168,14 +163,16 @@ const AgencyDetailsComp = ({ data }: Props) => {
     //WIP: discontinue agency subscription
     try {
       const response = await deleteAgency(data.id);
-      toast('Deleted Agency', {description: 'Deleted you agency and all sub accounts'});
+      toast('Deleted Agency', {
+        description: 'Deleted you agency and all sub accounts',
+      });
 
-  
       router.refresh();
     } catch (error) {
       console.log(error);
-      toast('Oppse! Deletion Failed', {description: 'Could not delete your agency'});
-
+      toast('Oppse! Deletion Failed', {
+        description: 'Could not delete your agency',
+      });
     }
     setDeletingAgency(false);
   };
@@ -185,9 +182,12 @@ const AgencyDetailsComp = ({ data }: Props) => {
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Agency Information</CardTitle>
+
           <CardDescription>
-            Lets create an agency for you business. You can edit agecny setting
-            later form the agency setting tab
+            {!data?.id
+              ? `Lets create an agency for you business. You can edit agency settings
+           later from the agency settings tab.`
+              : 'You can edit agency settings here'}
           </CardDescription>
         </CardHeader>
         <CardContent>
