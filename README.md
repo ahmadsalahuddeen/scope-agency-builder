@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## sneak peak
+![image](https://github.com/ahmadsalahuddeen/scope-agency-builder/assets/71287508/912e5749-b68a-4d34-b3a8-636208d5acac)
+
 
 ## Getting Started
 
