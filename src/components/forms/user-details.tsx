@@ -1,5 +1,6 @@
 'use client';
 import {
+  createOrChangeUserPermissions,
   getAuthUserDetails,
   getUserPermissions,
   saveActivityLogsNotification,
@@ -45,6 +46,8 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Loader } from 'lucide-react';
 import { Separator } from '../ui/separator';
+import { Switch } from '../ui/switch';
+import { v4 } from 'uuid';
 
 type Props = {
   id: string | null;
@@ -88,6 +91,7 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
       'SUBACCOUNT_GUEST',
     ]),
   });
+
   const form = useForm<z.infer<typeof userDataSchema>>({
     resolver: zodResolver(userDataSchema),
     mode: 'onChange',
@@ -151,6 +155,56 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
       console.log('Error could not submit');
     }
   };
+
+  const onChangePermission = async (
+    subAccountId: string,
+    val: boolean,
+    permissionId: string | undefined
+  ) => {
+    if (!data.user?.email) return;
+    setLoadingPermissions(true);
+    const response = await createOrChangeUserPermissions(
+      permissionId ? permissionId : v4(),
+      data?.user.email,
+      subAccountId,
+      val
+    );
+
+    if (type === 'agency') {
+      await saveActivityLogsNotification({
+        agencyId: authUserData?.Agency?.id,
+        description: `Gave ${userData?.name} access to | ${
+          subAccountsPermissions?.Permissions.find(
+            (p) => p.subAccountId === subAccountId
+          )?.SubAccount.name
+        } `,
+        subaccountId: subAccountsPermissions?.Permissions.find(
+          (p) => p.subAccountId === subAccountId
+        )?.SubAccount.id,
+      });
+    }
+
+    if (response) {
+      toast('Success', {
+        description: 'The request was successfull',
+      });
+      if (subAccountsPermissions) {
+        subAccountsPermissions.Permissions.find((perm) => {
+          if (perm.subAccountId === subAccountId) {
+            return { ...perm, access: !perm.access };
+          }
+          return perm;
+        });
+      }
+    } else {
+      toast.error('Failed', {
+        description: 'Could not update permissions',
+      });
+    }
+    router.refresh()
+    setLoadingPermissions(false)
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -271,6 +325,8 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
                 'Save User Details'
               )}
             </Button>
+
+            {/* only render if you are agency onwner editing team user details through  modal */}
             {authUserData?.role === 'AGENCY_OWNER' && (
               <div>
                 <Separator className="my-4" />
@@ -280,7 +336,36 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
                   access control for each Sub Account. This is only visible to
                   agency owners
                 </FormDescription>
-                <div className="flex flex-col gap-4"></div>
+                <div className="flex flex-col gap-4">
+                  {subAccounts.map((subAccount) => {
+                    const subAccountPermissionDetails =
+                      subAccountsPermissions?.Permissions.find(
+                        (p) => p.subAccountId === subAccount.id
+                      );
+
+                    return (
+                      <div
+                        key={subAccount.id}
+                        className="flex flex-col items-center justify-between rounded-lg border p-4"
+                      >
+                        <div>
+                          <p>{subAccount.name}</p>
+                        </div>
+                        <Switch
+                          disabled={loadingPermissions}
+                          checked={subAccountPermissionDetails?.access}
+                          onCheckedChange={(permission) => {
+                            onChangePermission(
+                              subAccount.id,
+                              permission,
+                              subAccountPermissionDetails?.id
+                            );
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </form>
