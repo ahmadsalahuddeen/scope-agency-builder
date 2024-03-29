@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -6,12 +6,40 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { db } from '@/lib/db';
+import { CheckCircle } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import React from 'react';
 
-type Props = {};
+type Props = {
+  params: {
+    agencyId: string;
+  };
+  searchParams: { code: string };
+};
 
-const Page = (props: Props) => {
+const Page = async ({ params, searchParams }: Props) => {
+  const agencyDetails = await db.agency.findUnique({
+    where: {
+      id: params.agencyId,
+    },
+  });
+
+  if (!agencyDetails) return;
+
+  const isAllAgencyDetailExists =
+    agencyDetails.address &&
+    agencyDetails.address &&
+    agencyDetails.agencyLogo &&
+    agencyDetails.city &&
+    agencyDetails.companyEmail &&
+    agencyDetails.companyPhone &&
+    agencyDetails.country &&
+    agencyDetails.name &&
+    agencyDetails.state &&
+    agencyDetails.zipCode;
+
   return (
     <div className="flex flex-col justify-center items-center">
       <div className="w-full h-full w-max-[800px]">
@@ -23,7 +51,6 @@ const Page = (props: Props) => {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-
             {/* // WIP: add trigger to install PWA functionality after production */}
             <div className="flex justify-between items-center gap-2 border p-4 rounded-lg w-full">
               <div className="flex md:items-center flex-col md:!flex-row gap-4">
@@ -39,34 +66,44 @@ const Page = (props: Props) => {
               <Button>Start</Button>
             </div>
 
-
             <div className="flex justify-between items-center gap-2 border p-4 rounded-lg w-full">
               <div className="flex md:items-center flex-col md:!flex-row gap-4">
                 <Image
-                  src={'/stripe.png'}
-                  alt="apple logo"
+                  src={'/stripelogo.png'}
+                  alt="stripe logo"
                   width={80}
                   height={80}
                   className="object-contain rounded-md"
                 />
-                <p>Connect your stripe account to accept payments and access dashboard</p>
+                <p>
+                  Connect your stripe account to accept payments and access
+                  dashboard
+                </p>
               </div>
               <Button>Start</Button>
             </div>
 
-
             <div className="flex justify-between items-center gap-2 border p-4 rounded-lg w-full">
               <div className="flex md:items-center flex-col md:!flex-row gap-4">
                 <Image
-                  src={'/appstore.png'}
+                  src={agencyDetails.agencyLogo}
                   alt="apple logo"
                   width={80}
                   height={80}
                   className="object-contain rounded-md"
                 />
-                <p>Save the website as a shortcut on your mobile devices. 📲</p>
+                <p>Fill in all you business details.</p>
               </div>
-              <Button>Start</Button>
+
+              {isAllAgencyDetailExists ? (
+                // <CheckCircle
+                //   size={50}
+                //   className="text-primary p-2 flex-shrink-0"
+                // />
+<Link href={`/agency/${params.agencyId}/settings`} className={buttonVariants()}>Start</Link>
+              ) : (
+                <Button>Start</Button>
+              )}
             </div>
           </CardContent>
         </Card>

@@ -4,7 +4,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/sonner"
 import { ThemeProvider } from '@/providers/theme-provider';
 import ModalProvider from '@/providers/modal-provider';
-const font = DM_Sans({ subsets: ['latin'] });
+const font = DM_Sans({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Scope',
