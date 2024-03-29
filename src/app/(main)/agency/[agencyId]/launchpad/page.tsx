@@ -96,13 +96,18 @@ const Page = async ({ params, searchParams }: Props) => {
               </div>
 
               {isAllAgencyDetailExists ? (
-                // <CheckCircle
-                //   size={50}
-                //   className="text-primary p-2 flex-shrink-0"
-                // />
-<Link href={`/agency/${params.agencyId}/settings`} className={buttonVariants()}>Start</Link>
+                <CheckCircle
+                  size={50}
+                  className="text-primary p-2 flex-shrink-0"
+                />
               ) : (
-                <Button>Start</Button>
+                <Link
+                  href={`/agency/${params.agencyId}/settings`}
+                  className={buttonVariants()}
+                >
+                  Start
+                </Link>
+
               )}
             </div>
           </CardContent>

@@ -389,28 +389,24 @@ export const getUserPermissions = async (userId: string) => {
     where: { id: userId },
     select: { Permissions: { include: { SubAccount: true } } },
   });
-  console.log('ddddddddddddddd', response)
+  console.log('ddddddddddddddd', response);
   return response;
 };
-
-
 
 export const updateUser = async (user: Partial<User>) => {
   const response = await db.user.update({
     where: { email: user.email },
     data: { ...user },
-  })
+  });
 
   await clerkClient.users.updateUserMetadata(response.id, {
     privateMetadata: {
       role: user.role || 'SUBACCOUNT_USER',
     },
-  })
+  });
 
-  return response
-}
-
-
+  return response;
+};
 
 export const createOrChangeUserPermissions = async (
   permissionId: string | undefined,
@@ -427,9 +423,32 @@ export const createOrChangeUserPermissions = async (
         email: userEmail,
         subAccountId: subAccountId,
       },
-    })
-    return response
+    });
+    return response;
   } catch (error) {
-    console.log('🔴Could not change persmission', error)
+    console.log('🔴Could not change persmission', error);
   }
-}
+};
+
+export const getSubaccountDetails = async (subaccountId: string) => {
+  try {
+    const response = await db.subAccount.findUnique({
+      where: { id: subaccountId },
+    });
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const deleteSubaccount = async (subaccountId: string) => {
+  try {
+    const response = await db.subAccount.delete({
+      where: { id: subaccountId },
+    });
+
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
