@@ -26,17 +26,21 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 import DeleteButton from './_components/delete-button';
+import { cn } from '@/lib/utils';
+import CreateSubaccountButton from './_components/create-subaccount-button';
 
-type Props = {};
+type Props = {
+  params: {agencyId: string}
+};
 
-const AllSubaccountsPage = async (props: Props) => {
+const AllSubaccountsPage = async ({params}: Props) => {
   const user = await getAuthUserDetails();
   if (!user) return;
 
   return (
     <AlertDialog>
       <div className="flex flex-col">
-        <Button>Create</Button>
+        <CreateSubaccountButton user={user} className='self-end w-[200px] m-6' id={params.agencyId} />
         <Command className="rounded-lg bg-transparent">
           <CommandInput placeholder="Search Accounts..." />
           <CommandList>
@@ -95,9 +99,12 @@ const AllSubaccountsPage = async (props: Props) => {
                             Cancel
                           </AlertDialogCancel>
                           <AlertDialogAction
-                            className={buttonVariants({
-                              variant: 'destructive'
-                            })}
+                            className={cn(
+                              buttonVariants({
+                                variant: 'destructive',
+                              }),
+                              ' hover:bg-red-600 hover:text-white'
+                            )}
                           >
                             <DeleteButton subaccountId={subaccount.id} />
                           </AlertDialogAction>
@@ -105,7 +112,9 @@ const AllSubaccountsPage = async (props: Props) => {
                       </AlertDialogContent>
                     </CommandItem>
                   ))
-                : 'df'}
+                : (
+                  <div className='text-muted-foreground p-4 text-center'>No Sub accounts</div>
+                )}
             </CommandGroup>
           </CommandList>
         </Command>

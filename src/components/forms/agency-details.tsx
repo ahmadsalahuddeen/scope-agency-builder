@@ -49,6 +49,7 @@ import { Button } from '../ui/button';
 
 import { v4 } from 'uuid';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 type Props = {
   data?: Partial<Agency>;
@@ -397,7 +398,7 @@ const AgencyDetailsComp = ({ data }: Props) => {
               )}
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? (
-                  <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   'Save Agency Information'
                 )}

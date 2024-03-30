@@ -33,6 +33,7 @@ import { useEffect } from 'react';
 import Loading from '../global/loading';
 import { useModal } from '@/providers/modal-provider';
 import { ReloadIcon } from '@radix-ui/react-icons';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   name: z.string(),
@@ -280,7 +281,7 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
             />
             <Button type="submit" disabled={isLoading}>
               {isLoading ? (
-                <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 'Save Account Information'
               )}
