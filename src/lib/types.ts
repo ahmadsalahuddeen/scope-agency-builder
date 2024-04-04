@@ -1,5 +1,6 @@
 import { Notification, Prisma, Role } from '@prisma/client';
 import { getAuthUserDetails, getUserPermissions } from './queries';
+import { db } from './db';
 
 export type NotificationWithUser =
   | ({

@@ -132,17 +132,14 @@ const createTeamUser = async (agencyId: string, user: User) => {
 };
 
 export const verifyAndAcceptInvitation = async () => {
-  const user = await currentUser();
-  if (!user) {
-    return redirect('/sign-in');
-  }
-
+  const user = await currentUser()
+  if (!user) return redirect('/sign-in')
   const invitationExists = await db.invitation.findUnique({
     where: {
       email: user.emailAddresses[0].emailAddress,
       status: 'PENDING',
     },
-  });
+  })
 
   if (invitationExists) {
     const userDetails = await createTeamUser(invitationExists.agencyId, {
@@ -154,29 +151,33 @@ export const verifyAndAcceptInvitation = async () => {
       role: invitationExists.role,
       createdAt: new Date(),
       updatedAt: new Date(),
-    });
-
+    })
     await saveActivityLogsNotification({
       agencyId: invitationExists?.agencyId,
-      description: 'Joined',
+      description: `Joined`,
       subaccountId: undefined,
-    });
+    })
+
     if (userDetails) {
       await clerkClient.users.updateUserMetadata(user.id, {
         privateMetadata: {
           role: userDetails.role || 'SUBACCOUNT_USER',
         },
-      });
-      await db.invitation.delete({ where: { email: userDetails.email } });
-      return userDetails.agencyId;
-    } else return null;
+      })
+
+      await db.invitation.delete({
+        where: { email: userDetails.email },
+      })
+
+      return userDetails.agencyId
+    } else return null
   } else {
     const agency = await db.user.findUnique({
       where: {
         email: user.emailAddresses[0].emailAddress,
       },
-    });
-    return agency ? agency.agencyId : null;
+    })
+    return agency ? agency.agencyId : null
   }
 };
 
@@ -482,3 +483,34 @@ export const getUser = async (userId: string) => {
     console.log(error);
   }
 };
+
+
+
+export const sendInvitation = async (
+  role: Role,
+  email: string,
+  agencyId: string
+) => {
+  
+  const resposne = await db.invitation.create({
+    data: { email, agencyId, role },
+  })
+
+  try {
+    const invitation = await clerkClient.invitations.createInvitation({
+      ignoreExisting: true, // send invitation even if it exist
+      emailAddress: email,
+      redirectUrl: process.env.NEXT_PUBLIC_URL,
+      publicMetadata: {
+        
+        throughInvitation: true,
+        role,
+      },
+    })
+  } catch (error) {
+    console.log(error)
+    throw error
+  }
+
+  return resposne
+}

@@ -4,6 +4,7 @@ import React from 'react';
 import DataTable from './data-table';
 import { Plus } from 'lucide-react';
 import { columns } from './columns';
+import SendInvitation from '@/components/forms/send-invitation';
 
 type Props = {
   params: {
@@ -42,7 +43,7 @@ const TeamPage = async ({ params }: Props) => {
     <Plus size={15} />
     Add
     </>}
-    modalChildren={<></>}
+    modalChildren={<><SendInvitation agencyId={params.agencyId} /></>}
     filterValue={'name'}
     columns={columns}
     data={teamMembers}
