@@ -389,7 +389,7 @@ export const getUserPermissions = async (userId: string) => {
     where: { id: userId },
     select: { Permissions: { include: { SubAccount: true } } },
   });
-  console.log('ddddddddddddddd', response);
+
   return response;
 };
 
@@ -408,6 +408,7 @@ export const updateUser = async (user: Partial<User>) => {
   return response;
 };
 
+
 export const createOrChangeUserPermissions = async (
   permissionId: string | undefined,
   userEmail: string,
@@ -423,12 +424,12 @@ export const createOrChangeUserPermissions = async (
         email: userEmail,
         subAccountId: subAccountId,
       },
-    });
-    return response;
+    })
+    return response
   } catch (error) {
-    console.log('🔴Could not change persmission', error);
+    console.log('🔴Could not change persmission', error)
   }
-};
+}
 
 export const getSubaccountDetails = async (subaccountId: string) => {
   try {
@@ -445,6 +446,35 @@ export const deleteSubaccount = async (subaccountId: string) => {
   try {
     const response = await db.subAccount.delete({
       where: { id: subaccountId },
+    });
+
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const deleteUser = async (userId: string) => {
+  try {
+    await clerkClient.users.updateUserMetadata(userId, {
+      privateMetadata: {
+        role: undefined,
+      },
+    });
+    const deletedUser = await db.user.delete({
+      where: { id: userId },
+    });
+
+    return deletedUser;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const getUser = async (userId: string) => {
+  try {
+    const response = await db.user.findUnique({
+      where: { id: userId },
     });
 
     return response;

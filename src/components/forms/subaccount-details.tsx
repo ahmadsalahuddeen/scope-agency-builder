@@ -125,7 +125,7 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
     if (details) {
       form.reset(details);
     }
-  }, [details]);
+}, [details]);
 
   const isLoading = form.formState.isSubmitting;
   //CHALLENGE Create this form.

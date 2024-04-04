@@ -52,8 +52,8 @@ import { v4 } from 'uuid';
 type Props = {
   id: string | null;
   type: 'agency' | 'subaccount';
-  userData: Partial<User>;
-  subAccounts: SubAccount[];
+  userData?: Partial<User>;
+  subAccounts?: SubAccount[];
 };
 
 const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
@@ -159,17 +159,16 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
   const onChangePermission = async (
     subAccountId: string,
     val: boolean,
-    permissionId: string | undefined
+    permissionsId: string | undefined
   ) => {
-    if (!data.user?.email) return;
-    setLoadingPermissions(true);
+    if (!data.user?.email) return
+    setLoadingPermissions(true)
     const response = await createOrChangeUserPermissions(
-      permissionId ? permissionId : v4(),
-      data?.user.email,
+      permissionsId ? permissionsId : v4(),
+      data.user.email,
       subAccountId,
       val
-    );
-
+    )
     if (type === 'agency') {
       await saveActivityLogsNotification({
         agencyId: authUserData?.Agency?.id,
@@ -181,30 +180,29 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
         subaccountId: subAccountsPermissions?.Permissions.find(
           (p) => p.subAccountId === subAccountId
         )?.SubAccount.id,
-      });
+      })
     }
 
     if (response) {
-      toast('Success', {
+      toast('Success',{
         description: 'The request was successfull',
-      });
+      })
       if (subAccountsPermissions) {
         subAccountsPermissions.Permissions.find((perm) => {
           if (perm.subAccountId === subAccountId) {
-            return { ...perm, access: !perm.access };
+            return { ...perm, access: !perm.access }
           }
-          return perm;
-        });
+          return perm
+        })
       }
     } else {
-      toast.error('Failed', {
+      toast.error('Failed',{
         description: 'Could not update permissions',
-      });
+      })
     }
     router.refresh()
     setLoadingPermissions(false)
-  };
-
+  }
   return (
     <Card className="w-full">
       <CardHeader>
@@ -306,7 +304,7 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
                         Subaccount User
                       </SelectItem>
                       {(data.user?.role === 'AGENCY_OWNER' ||
-                        userData.role === 'AGENCY_OWNER') && (
+                        userData?.role === 'AGENCY_OWNER') && (
                         <SelectItem value="AGENCY_OWNER">
                           Agency Owner
                         </SelectItem>
@@ -327,43 +325,42 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
             </Button>
 
             {/* only render if you are agency onwner editing team user details through  modal */}
-            {authUserData?.role === 'AGENCY_OWNER' && (
+            {(authUserData?.role === 'AGENCY_OWNER' && data.user?.role !== 'AGENCY_OWNER') && (
               <div>
                 <Separator className="my-4" />
-                <FormLabel>User Permissions</FormLabel>
+                <FormLabel> User Permissions</FormLabel>
                 <FormDescription className="mb-4">
                   You can give Sub Account access to team member by turning on
                   access control for each Sub Account. This is only visible to
                   agency owners
                 </FormDescription>
                 <div className="flex flex-col gap-4">
-                  {subAccounts.map((subAccount) => {
-                    const subAccountPermissionDetails =
+                  {subAccounts?.map((subAccount) => {
+                    const subAccountPermissionsDetails =
                       subAccountsPermissions?.Permissions.find(
                         (p) => p.subAccountId === subAccount.id
-                      );
-
+                      )
                     return (
                       <div
                         key={subAccount.id}
-                        className="flex flex-col items-center justify-between rounded-lg border p-4"
+                        className="flex items-center justify-between rounded-lg border p-4"
                       >
                         <div>
                           <p>{subAccount.name}</p>
                         </div>
                         <Switch
                           disabled={loadingPermissions}
-                          checked={subAccountPermissionDetails?.access}
+                          checked={subAccountPermissionsDetails?.access}
                           onCheckedChange={(permission) => {
                             onChangePermission(
                               subAccount.id,
                               permission,
-                              subAccountPermissionDetails?.id
-                            );
+                              subAccountPermissionsDetails?.id
+                            )
                           }}
                         />
                       </div>
-                    );
+                    )
                   })}
                 </div>
               </div>
