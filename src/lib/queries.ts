@@ -126,20 +126,20 @@ export const saveActivityLogsNotification = async ({
 // create a team user
 const createTeamUser = async (agencyId: string, user: User) => {
   try {
-    console.log('create team user getting')
+
     if ((user.role === 'AGENCY_OWNER')) return null;
   
     const response = await db.user.create({ data: { ...user } });
     
     return response;
   } catch (error) {
-    console.log('error at createTeamUser: ', error)
+
   }
 };
 
 export const verifyAndAcceptInvitation = async () => {
   const user = await currentUser()
-console.log('000000', )
+
 
   if (!user) return redirect('/sign-in')
   const invitationExists = await db.invitation.findUnique({
@@ -148,9 +148,7 @@ console.log('000000', )
       status: 'PENDING',
     },
   })
-console.log('1111111', invitationExists)
   if (invitationExists) {
-console.log('222222222')
 
     const userDetails = await createTeamUser(invitationExists.agencyId, {
       email: invitationExists.email,
@@ -162,7 +160,6 @@ console.log('222222222')
       createdAt: new Date(),
       updatedAt: new Date(),
     })
-console.log('33333', userDetails)
 
     await saveActivityLogsNotification({
       agencyId: invitationExists?.agencyId,
