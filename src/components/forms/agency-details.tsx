@@ -88,7 +88,7 @@ const AgencyDetailsComp = ({ data }: Props) => {
       country: data?.country,
     },
   });
-  const isLoading = form.formState.isLoading;
+  let isLoading = form.formState.isLoading;
   useEffect(() => {
     if (data) {
       form.reset(data);
@@ -96,6 +96,7 @@ const AgencyDetailsComp = ({ data }: Props) => {
   }, [data]);
 
   const handleSubmit = async (values: z.infer<typeof FormSchema>) => {
+    isLoading = true
     try {
       let newUserData;
       let customerId;
@@ -149,9 +150,10 @@ const AgencyDetailsComp = ({ data }: Props) => {
       });
 
       toast('Updated Agency information');
-
+      isLoading= false
       return router.refresh();
     } catch (error) {
+      isLoading = false
       console.log(error);
       toast('Oppse!', { description: 'could not create your agency' });
     }
