@@ -30,6 +30,7 @@ import { Button } from '../ui/button';
 import Loading from '../global/loading';
 import { saveActivityLogsNotification, sendInvitation } from '@/lib/queries';
 import { toast } from 'sonner';
+import { Role } from '@prisma/client';
 
 interface SendInvitationProps {
   agencyId: string;
@@ -63,13 +64,7 @@ const SendInvitation: React.FC<SendInvitationProps> = ({ agencyId }) => {
         });
       } else {
         // Handle success case (res is an invitation object)
-        const invitation = res as {
-          id: string;
-          email: string;
-          agencyId: string;
-          status: InvitationStatus;
-          role: Role;
-        };
+        const invitation = res;
 
         // Log activity notification
         await saveActivityLogsNotification({
