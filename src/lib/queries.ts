@@ -501,7 +501,10 @@ export const sendInvitation = async (
     });
   } catch (error) {
     // Handle Prisma errors
-    if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
+    if (
+      error instanceof PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    ) {
       console.error('Invitation with this email already exists');
       return { error: 'invitationExist' };
     }
@@ -525,4 +528,19 @@ export const sendInvitation = async (
   }
 
   return response; // Return the response from Prisma
+};
+
+export const getMediaFiles = async (subaccountId: string) => {
+  try {
+    const mediaFiles = await db.subAccount.findUnique({
+      where: { id: subaccountId },
+      include: {
+        Media: true,
+      },
+    });
+
+    return mediaFiles;
+  } catch (error) {
+    console.log(error);
+  }
 };
