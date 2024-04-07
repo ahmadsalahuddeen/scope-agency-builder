@@ -1,13 +1,13 @@
-'use client'
-import React from 'react'
-import { z } from 'zod'
+'use client';
+import React from 'react';
+import { z } from 'zod';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '../ui/card'
+} from '../ui/card';
 import {
   Form,
   FormControl,
@@ -15,33 +15,31 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../ui/form'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Input } from '../ui/input'
+} from '../ui/form';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Input } from '../ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select'
-import { Button } from '../ui/button'
-import Loading from '../global/loading'
-import { saveActivityLogsNotification, sendInvitation } from '@/lib/queries'
-import { toast } from 'sonner'
-
+} from '../ui/select';
+import { Button } from '../ui/button';
+import Loading from '../global/loading';
+import { saveActivityLogsNotification, sendInvitation } from '@/lib/queries';
+import { toast } from 'sonner';
 
 interface SendInvitationProps {
-  agencyId: string
+  agencyId: string;
 }
 
 const SendInvitation: React.FC<SendInvitationProps> = ({ agencyId }) => {
-
   const userDataSchema = z.object({
     email: z.string().email(),
     role: z.enum(['AGENCY_ADMIN', 'SUBACCOUNT_USER', 'SUBACCOUNT_GUEST']),
-  })
+  });
 
   const form = useForm<z.infer<typeof userDataSchema>>({
     resolver: zodResolver(userDataSchema),
@@ -50,26 +48,48 @@ const SendInvitation: React.FC<SendInvitationProps> = ({ agencyId }) => {
       email: '',
       role: 'SUBACCOUNT_USER',
     },
-  })
+  });
 
   const onSubmit = async (values: z.infer<typeof userDataSchema>) => {
     try {
-      const res = await sendInvitation(values.role, values.email, agencyId)
-      await saveActivityLogsNotification({
-        agencyId: agencyId,
-        description: `Invited ${res.email}`,
-        subaccountId: undefined,
-      })
-      toast('Success',{
-        description: 'Created and sent invitation',
-      })
+      const res = await sendInvitation(values.role, values.email, agencyId);
+
+      // Check the type of res to determine if it's an invitation or an error
+      if ('error' in res) {
+        // Handle error case
+        toast.error('Invitation already exists', {
+          description:
+            'Inform the team member to visit and sign in with the invited email address.',
+        });
+      } else {
+        // Handle success case (res is an invitation object)
+        const invitation = res as {
+          id: string;
+          email: string;
+          agencyId: string;
+          status: InvitationStatus;
+          role: Role;
+        };
+
+        // Log activity notification
+        await saveActivityLogsNotification({
+          agencyId: agencyId,
+          description: `Invited ${invitation.email}`,
+          subaccountId: undefined,
+        });
+
+        // Display success message
+        toast.success('Success', {
+          description: 'Created and sent invitation.',
+        });
+      }
     } catch (error) {
-      console.log('ddddddddddddd' ,error)
-      toast.error('Oppse!',{
-        description: 'Could not send invitation',
-      })
+      console.error('Error sending invitation:', error);
+      toast.error('Oops!', {
+        description: 'Could not send invitation. Please try again.',
+      });
     }
-  }
+  };
 
   return (
     <Card>
@@ -95,10 +115,7 @@ const SendInvitation: React.FC<SendInvitationProps> = ({ agencyId }) => {
                 <FormItem className="flex-1">
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Email"
-                      {...field}
-                    />
+                    <Input placeholder="Email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -134,17 +151,14 @@ const SendInvitation: React.FC<SendInvitationProps> = ({ agencyId }) => {
                 </FormItem>
               )}
             />
-            <Button
-              disabled={form.formState.isSubmitting}
-              type="submit"
-            >
+            <Button disabled={form.formState.isSubmitting} type="submit">
               {form.formState.isSubmitting ? <Loading /> : 'Send Invitation'}
             </Button>
           </form>
         </Form>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default SendInvitation
+export default SendInvitation;

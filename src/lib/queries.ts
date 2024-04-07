@@ -3,9 +3,10 @@
 import { clerkClient, currentUser } from '@clerk/nextjs';
 import { db } from './db';
 import { redirect } from 'next/navigation';
-import { Agency, Plan, Role, SubAccount, User } from '@prisma/client';
+import { Agency, Plan, Prisma, Role, SubAccount, User } from '@prisma/client';
 import { connect } from 'http2';
 import { v4 } from 'uuid';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 export const getAuthUserDetails = async () => {
   const user = await currentUser();
@@ -126,30 +127,25 @@ export const saveActivityLogsNotification = async ({
 // create a team user
 const createTeamUser = async (agencyId: string, user: User) => {
   try {
+    if (user.role === 'AGENCY_OWNER') return null;
 
-    if ((user.role === 'AGENCY_OWNER')) return null;
-  
     const response = await db.user.create({ data: { ...user } });
-    
-    return response;
-  } catch (error) {
 
-  }
+    return response;
+  } catch (error) {}
 };
 
 export const verifyAndAcceptInvitation = async () => {
-  const user = await currentUser()
+  const user = await currentUser();
 
-
-  if (!user) return redirect('/sign-in')
+  if (!user) return redirect('/sign-in');
   const invitationExists = await db.invitation.findUnique({
     where: {
       email: user.emailAddresses[0].emailAddress,
       status: 'PENDING',
     },
-  })
+  });
   if (invitationExists) {
-
     const userDetails = await createTeamUser(invitationExists.agencyId, {
       email: invitationExists.email,
       agencyId: invitationExists.agencyId,
@@ -159,34 +155,34 @@ export const verifyAndAcceptInvitation = async () => {
       role: invitationExists.role,
       createdAt: new Date(),
       updatedAt: new Date(),
-    })
+    });
 
     await saveActivityLogsNotification({
       agencyId: invitationExists?.agencyId,
       description: `Joined`,
       subaccountId: undefined,
-    })
+    });
 
     if (userDetails) {
       await clerkClient.users.updateUserMetadata(user.id, {
         privateMetadata: {
           role: userDetails.role || 'SUBACCOUNT_USER',
         },
-      })
+      });
 
       await db.invitation.delete({
         where: { email: userDetails.email },
-      })
+      });
 
-      return userDetails.agencyId
-    } else return null
+      return userDetails.agencyId;
+    } else return null;
   } else {
     const agency = await db.user.findUnique({
       where: {
         email: user.emailAddresses[0].emailAddress,
       },
-    })
-    return agency ? agency.agencyId : null
+    });
+    return agency ? agency.agencyId : null;
   }
 };
 
@@ -418,7 +414,6 @@ export const updateUser = async (user: Partial<User>) => {
   return response;
 };
 
-
 export const createOrChangeUserPermissions = async (
   permissionId: string | undefined,
   userEmail: string,
@@ -434,12 +429,12 @@ export const createOrChangeUserPermissions = async (
         email: userEmail,
         subAccountId: subAccountId,
       },
-    })
-    return response
+    });
+    return response;
   } catch (error) {
-    console.log('🔴Could not change persmission', error)
+    console.log('🔴Could not change persmission', error);
   }
-}
+};
 
 export const getSubaccountDetails = async (subaccountId: string) => {
   try {
@@ -492,34 +487,42 @@ export const getUser = async (userId: string) => {
     console.log(error);
   }
 };
-
-
-
 export const sendInvitation = async (
   role: Role,
   email: string,
   agencyId: string
 ) => {
-  
-  const resposne = await db.invitation.create({
-    data: { email, agencyId, role },
-  })
+  let response;
 
   try {
-    const invitation = await clerkClient.invitations.createInvitation({
-      ignoreExisting: true, // send invitation even if it exist
+    // Create invitation in Prisma
+    response = await db.invitation.create({
+      data: { email, agencyId, role },
+    });
+  } catch (error) {
+    // Handle Prisma errors
+    if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
+      console.error('Invitation with this email already exists');
+      return { error: 'invitationExist' };
+    }
+    throw error; // Rethrow other Prisma errors
+  }
+
+  try {
+    // Send invitation using Clerk
+    await clerkClient.invitations.createInvitation({
+      ignoreExisting: true,
       emailAddress: email,
       redirectUrl: process.env.NEXT_PUBLIC_URL,
       publicMetadata: {
-        
         throughInvitation: true,
         role,
       },
-    })
+    });
   } catch (error) {
-    console.log(error)
-    throw error
+    console.error('Error sending invitation:', error);
+    throw error; // Rethrow Clerk errors
   }
 
-  return resposne
-}
+  return response; // Return the response from Prisma
+};
