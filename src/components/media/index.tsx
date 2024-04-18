@@ -1,5 +1,8 @@
 import { GetMediaFilesType } from '@/lib/types';
 import React from 'react';
+import MediaUploadButton from './media-upload-button';
+import { Command, CommandInput, CommandList } from '../ui/command';
+import { CommandEmpty } from 'cmdk';
 
 type Props = {
   data: GetMediaFilesType;
@@ -12,9 +15,15 @@ const MediaComponent = ({ data, subaccountId }: Props) => {
 
       <div className="flex items-center justify-between">
         <h1 className='text-4xl'>Media Bucket</h1>
-      <UploadButton subaccountId={subaccountId} />
+      <MediaUploadButton subaccountId={subaccountId} />
       
-      </div>
+      </div>  
+      <Command className='bg-transparent'>
+        <CommandInput placeholder='Search file name'/>
+        <CommandList>
+          <CommandEmpty>No Media Files</CommandEmpty>
+        </CommandList>
+      </Command>
     </div>
   );
 };

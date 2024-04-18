@@ -48,3 +48,4 @@ export type UsersWithAgencySubAccountPermissionsSidebarOptions =
   >;
 
 export type GetMediaFilesType = Prisma.PromiseReturnType<typeof getMediaFiles>;
+export type CreateMediaType = Prisma.MediaCreateWithoutSubaccountInput

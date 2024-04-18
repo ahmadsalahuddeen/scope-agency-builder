@@ -7,6 +7,7 @@ import { Agency, Plan, Prisma, Role, SubAccount, User } from '@prisma/client';
 import { connect } from 'http2';
 import { v4 } from 'uuid';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { CreateMediaType } from './types';
 
 export const getAuthUserDetails = async () => {
   const user = await currentUser();
@@ -540,6 +541,24 @@ export const getMediaFiles = async (subaccountId: string) => {
     });
 
     return mediaFiles;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const createMedia = async (
+  subaccountId: string,
+  MediaFile: CreateMediaType
+) => {
+  try {
+    const response = await db.media.create({
+      data: {
+        link: MediaFile.link,
+        name: MediaFile.name,
+        subAccountId: subaccountId,
+      },
+    });
+    return response;
   } catch (error) {
     console.log(error);
   }
